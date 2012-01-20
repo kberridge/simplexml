@@ -1,0 +1,16 @@
+syntax: glob
+
+*.orig
+*.suo
+*.swp
+*.sln.cache
+*.sln.docstates
+*.user
+bin
+obj
+*/bin
+*/Bin
+*/obj
+_ReSharper*
+*.resharper.user
+tags
