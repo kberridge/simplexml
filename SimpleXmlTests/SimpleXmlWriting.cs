@@ -88,6 +88,19 @@ namespace SimpleXmlTests
     }
 
     [Test]
+    public void SettingValueOfRootOnlyAttribute()
+    {
+      string ex = "<root attr=\"test\">value</root>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      x.root.attr = "testvalue";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(xmlString.Contains("<root attr=\"testvalue\">value</root>"));
+    }
+
+    [Test]
     public void MissingNode()
     {
       string ex = "<root><child>value</child></root>";

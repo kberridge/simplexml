@@ -32,7 +32,12 @@ namespace SimpleXmlNs
       result = null;
 
       if (element.Name.LocalName == binder.Name) // root
-        result = this;
+      {
+        if (element.HasElements || element.HasAttributes)
+          result = this;
+        else
+          result = element.Value;
+      }
 
       if (!element.HasElements && element.HasAttributes && binder.Name.ToLower() == "text") // leaf with attributes
         result = element.Value;
@@ -50,7 +55,13 @@ namespace SimpleXmlNs
           result = sub.Value;
       }
       else
-        result = element.Attribute(binder.Name).Value;
+      {
+        var attr = element.Attribute(binder.Name);
+        if (attr != null)
+          result = attr.Value;
+        else
+          throw new InvalidOperationException("No node or attribute found: " + binder.Name);
+      }
 
       return result != null;
     }
