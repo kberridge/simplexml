@@ -46,34 +46,19 @@ namespace SimpleXmlNs
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
     {
-      if (IsFirstPropertyAccess(element, binder.Name))
-      {
-        if (element.HasElements)
-          throw new InvalidOperationException("Can't set the value of a node which has child nodes");
+      bool wasSet = SetFirstProperty(element, binder.Name, value);
+      if (wasSet) return true;
 
-        element.Value = value as string;
-        return true;
-      }
+      wasSet = SetBySpecialInnerValueProperty(element, binder.Name, value);
+      if (wasSet) return true;
 
-      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(binder.Name))
-      {
-        element.Value = value as string;
-        return true;
-      }
+      wasSet = SetElementValue(element, binder.Name, value);
+      if (wasSet) return true;
 
-      var sub = element.Element(binder.Name);
-      if (sub != null)
-        sub.Value = value as string;
-      else
-      {
-        var attr = element.Attribute(binder.Name);
-        if (attr != null)
-          attr.Value = value as string;
-        else
-          throw new InvalidOperationException("No node or attribute found: " + binder.Name);
-      }
+      wasSet = SetAttributeValue(element, binder.Name, value);
+      if (wasSet) return true;
 
-      return true;
+      throw new InvalidOperationException("No node or attribute found: " + binder.Name);
     }
 
     public string GetXml()
@@ -130,6 +115,47 @@ namespace SimpleXmlNs
       return attr.Value;
     }
 
+    bool SetFirstProperty(XElement element, string propertyName, object value)
+    {
+      if (!IsFirstPropertyAccess(element, propertyName)) return false;
+
+      if (element.HasElements)
+        throw new InvalidOperationException("Can't set the value of a node which has child nodes");
+
+      element.Value = value as string;
+      return true;
+    }
+
+    bool SetBySpecialInnerValueProperty(XElement element, string propertyName, object value)
+
+    {
+      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(propertyName))
+      {
+        element.Value = value as string;
+        return true;
+      }
+
+      return false;
+    }
+
+    bool SetElementValue(XElement element, string propertyName, object value)
+    {
+      var sub = element.Element(propertyName);
+      if (sub == null) return false;
+
+      sub.Value = value as string;
+      return true;
+    }
+
+    bool SetAttributeValue(XElement element, string propertyName, object value)
+    {
+      var attr = element.Attribute(propertyName);
+      if (attr == null) return false;
+
+      attr.Value = value as string;
+      return true;
+    }
+
     bool HasChildValues(XElement e)
     {
       return e.HasElements || e.HasAttributes;
@@ -140,14 +166,14 @@ namespace SimpleXmlNs
       return !e.HasElements && e.HasAttributes;
     }
 
-    bool IsSpecialInnerValueProperty(string binderName)
+    bool IsSpecialInnerValueProperty(string propertyName)
     {
-      return binderName.ToLower() == "text";
+      return propertyName.ToLower() == "text";
     }
 
-    bool IsFirstPropertyAccess(XElement element, string binderName)
+    bool IsFirstPropertyAccess(XElement element, string propertyName)
     {
-      return element.Name.LocalName == binderName;
+      return element.Name.LocalName == propertyName;
     }
   }
 }
