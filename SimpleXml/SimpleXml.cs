@@ -31,15 +31,15 @@ namespace SimpleXmlNs
     {
       result = null;
 
-      if (element.Name.LocalName == binder.Name) // root
+      if (IsFirstPropertyAccess(binder.Name))
       {
-        if (element.HasElements || element.HasAttributes)
+        if (HasChildValues(element))
           result = this;
         else
           result = element.Value;
       }
 
-      if (!element.HasElements && element.HasAttributes && binder.Name.ToLower() == "text") // leaf with attributes
+      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(binder.Name))
         result = element.Value;
 
       if (result != null) return true;
@@ -47,7 +47,7 @@ namespace SimpleXmlNs
       var sub = element.Element(binder.Name);
       if (sub != null)
       {
-        if (sub.HasElements || sub.HasAttributes)
+        if (HasChildValues(sub))
           result = new SimpleXml(sub);
         else
           result = sub.Value;
@@ -66,7 +66,7 @@ namespace SimpleXmlNs
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
     {
-      if (element.Name.LocalName == binder.Name) // root
+      if (IsFirstPropertyAccess(binder.Name))
       {
         if (element.HasElements)
           throw new InvalidOperationException("Can't set the value of a node which has child nodes");
@@ -75,7 +75,7 @@ namespace SimpleXmlNs
         return true;
       }
 
-      if (!element.HasElements && element.HasAttributes && binder.Name.ToLower() == "text") // leaf with attributes
+      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(binder.Name))
       {
         element.Value = value as string;
         return true;
@@ -111,6 +111,26 @@ namespace SimpleXmlNs
     public void Save(TextWriter writer, SaveOptions options=SaveOptions.None)
     {
       element.Save(writer, options);
+    }
+
+    bool HasChildValues(XElement e)
+    {
+      return e.HasElements || e.HasAttributes;
+    }
+
+    bool IsLeafWithAttributes(XElement e)
+    {
+      return !e.HasElements && e.HasAttributes;
+    }
+
+    bool IsSpecialInnerValueProperty(string binderName)
+    {
+      return binderName.ToLower() == "text";
+    }
+
+    bool IsFirstPropertyAccess(string binderName)
+    {
+      return element.Name.LocalName == binderName;
     }
   }
 }
