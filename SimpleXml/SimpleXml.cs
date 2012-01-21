@@ -49,8 +49,6 @@ namespace SimpleXmlNs
       {
         if (sub.HasElements || sub.HasAttributes)
           result = new SimpleXml(sub);
-        else if (sub.HasAttributes)
-          result = new SimpleXml(sub);
         else
           result = sub.Value;
       }
