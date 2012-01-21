@@ -9,7 +9,7 @@ using SimpleXmlNs;
 namespace SimpleXmlTests
 {
   [TestFixture]
-  public class SimpleXmlTests
+  public class SimpleXmlReading
   {
     [Test]
     public void SimpleValues()
