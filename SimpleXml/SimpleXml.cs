@@ -110,9 +110,9 @@ namespace SimpleXmlNs
       element.Save(stream, options);
     }
 
-    public void Save(TextWriter writer)
+    public void Save(TextWriter writer, SaveOptions options=SaveOptions.None)
     {
-      element.Save(writer);
+      element.Save(writer, options);
     }
   }
 }
