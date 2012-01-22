@@ -3,9 +3,9 @@ SimpleXml is simple dynamic xml parsing.
 **Read Xml**::
 
   var x = 
-  @"<root attr="attrvalue">
-    <child>nodevalue</child>
-  </root>".AsSimpleXml();
+    @"<root attr="attrvalue">
+      <child>nodevalue</child>
+    </root>".AsSimpleXml();
 
   x.root.child == "nodevalue"
   x.root.attr == "attrvalue"
@@ -28,18 +28,18 @@ SimpleXml is simple dynamic xml parsing.
 **Ignores Namespaces**::
 
   var x =
-  @"<root xmlns="http://kevinberridge.com/namespacessuck" xmlns:t="http://kevinberridge.com/namespacesreallysuck">
-    <t:child>value</child>
-  </root>".AsSimpleXml();
+    @"<root xmlns="http://kevinberridge.com/namespacessuck" xmlns:t="http://kevinberridge.com/namespacesreallysuck">
+      <t:child>value</child>
+    </root>".AsSimpleXml();
 
   x.root.child == "value"
 
 **Special Case For Leaf Nodes With Attributes**::
 
   var x =
-  @"<root>
-    <child attr="attrvalue">childvalue</child>
-  </root>".AsSimpleXml();
+    @"<root>
+      <child attr="attrvalue">childvalue</child>
+    </root>".AsSimpleXml();
 
   x.root.child.text == "childvalue"
   x.root.child.attr == "attrvalue"
