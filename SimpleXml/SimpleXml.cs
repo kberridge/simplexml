@@ -98,7 +98,7 @@ namespace SimpleXmlNs
 
     object FindChildNode(XElement element, string propertyName)
     {
-      var sub = element.Element(propertyName);
+      var sub = element.Elements().FirstOrDefault(e => e.Name.LocalName == propertyName);
       if (sub == null) return null;
 
       if (HasChildValues(sub))
@@ -140,7 +140,7 @@ namespace SimpleXmlNs
 
     bool SetElementValue(XElement element, string propertyName, object value)
     {
-      var sub = element.Element(propertyName);
+      var sub = element.Elements().FirstOrDefault(e => e.Name.LocalName == propertyName);
       if (sub == null) return false;
 
       sub.Value = value as string;

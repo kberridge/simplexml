@@ -101,5 +101,52 @@ namespace SimpleXmlTests
 
       Assert.Catch<InvalidOperationException>(() => { var s = x.root.child.noattr; });
     }
+
+    [Test]
+    public void WithSiblingNodesWithDiffNames()
+    {
+      string ex = "<root><node1>test</node1><node2>test2</node2></root>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      Assert.AreEqual("test2", x.root.node2);
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNames()
+    {
+      string ex = "<root><node>test</node><node>test2</node></root>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      Assert.AreEqual("test", x.root.node);
+    }
+
+    [Test]
+    public void WithXmlNs()
+    {
+      string ex = @"<section xmlns='urn:com:blogs-r-us'>
+   <title>Blogs</title>
+   <signing>
+     <author title='Mr' name='Kevin Berridge' />
+     <blog title='kwblog' />
+   </signing>
+</section>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      Assert.AreEqual("Mr", x.section.signing.author.title);
+    }
+
+    [Test]
+    public void WithNamedXmlNs()
+    {
+      string ex = "<h:section xmlns:h=\"http://www.w3.org/HTML/1998/html4\"><h:title>Blogs</h:title></h:section>";
+
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      Assert.AreEqual("Blogs", x.section.title);
+    }
   }
 }

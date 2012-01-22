@@ -119,5 +119,65 @@ namespace SimpleXmlTests
 
       Assert.Catch<InvalidOperationException>(() => x.root.child.noattr = "missing");
     }
+
+    [Test]
+    public void WithSiblingNodesWithDiffNames()
+    {
+      string ex = "<root><node1>test</node1><node2>test2</node2></root>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      x.root.node2 = "test3";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(xmlString.Contains("<node2>test3</node2>"));
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNames()
+    {
+      string ex = "<root><node>test</node><node>test2</node></root>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      x.root.node = "test3";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(xmlString.Contains("<node>test3</node>"));
+      Assert.IsTrue(xmlString.Contains("<node>test2</node>"));
+    }
+
+    [Test]
+    public void WithXmlNs()
+    {
+      string ex = @"<section xmlns='urn:com:blogs-r-us'>
+   <title>Blogs</title>
+   <signing>
+     <author title='Mr' name='Kevin Berridge' />
+     <blog title='kwblog' />
+   </signing>
+</section>";
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      x.section.title = "Great Blogs";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(xmlString.Contains("<title>Great Blogs</title>"));
+    }
+
+    [Test]
+    public void WithNamedXmlNs()
+    {
+      string ex = "<h:section xmlns:h=\"http://www.w3.org/HTML/1998/html4\"><h:title>Blogs</h:title></h:section>";
+
+      var r = new StringReader(ex);
+      dynamic x = new SimpleXml(r);
+
+      x.section.title = "Awesome Blogs";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(xmlString.Contains("<h:title>Awesome Blogs</h:title>"));
+    }
   }
 }
