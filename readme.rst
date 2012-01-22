@@ -1,39 +1,45 @@
 SimpleXml is simple dynamic xml parsing.
 
-**Read Xml**
-``var x = 
-@"<root attr="attrvalue">
-  <child>nodevalue</child>
-</root>".AsSimpleXml();
+**Read Xml**::
 
-x.root.child == "nodevalue"
-x.root.attr == "attrvalue"``
+  var x = 
+  @"<root attr="attrvalue">
+    <child>nodevalue</child>
+  </root>".AsSimpleXml();
 
-**Write Xml**
-``x.root.child = "newnodevalue";
-x.root.attr = "newattrvalue";``
+  x.root.child == "nodevalue"
+  x.root.attr == "attrvalue"
 
-**Load From File**
-``var stream = File.Open("path\to\file", FileMode.Open);
-dynamic x = new SimpleXml(stream);``
+**Write Xml**::
 
-**Save To File**
-``var stream = File.Open("path\to\file", FileMode.Create);
-x.Save(stream);``
+  x.root.child = "newnodevalue";
+  x.root.attr = "newattrvalue";
 
-**Ignores Namespaces**
-``var x =
-@"<root xmlns="http://kevinberridge.com/namespacessuck" xmlns:t="http://kevinberridge.com/namespacesreallysuck">
-  <t:child>value</child>
-</root>".AsSimpleXml();
+**Load From File**::
 
-x.root.child == "value"``
+  var stream = File.Open("path\to\file", FileMode.Open);
+  dynamic x = new SimpleXml(stream);
 
-**Special Case For Leaf Nodes With Attributes**
-``var x =
-@"<root>
-  <child attr="attrvalue">childvalue</child>
-</root>".AsSimpleXml();
+**Save To File**::
 
-x.root.child.text == "childvalue"
-x.root.child.attr == "attrvalue"``
+  var stream = File.Open("path\to\file", FileMode.Create);
+  x.Save(stream);
+
+**Ignores Namespaces**::
+
+  var x =
+  @"<root xmlns="http://kevinberridge.com/namespacessuck" xmlns:t="http://kevinberridge.com/namespacesreallysuck">
+    <t:child>value</child>
+  </root>".AsSimpleXml();
+
+  x.root.child == "value"
+
+**Special Case For Leaf Nodes With Attributes**::
+
+  var x =
+  @"<root>
+    <child attr="attrvalue">childvalue</child>
+  </root>".AsSimpleXml();
+
+  x.root.child.text == "childvalue"
+  x.root.child.attr == "attrvalue"
