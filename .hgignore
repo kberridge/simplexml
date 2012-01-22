@@ -15,3 +15,4 @@ _ReSharper*
 *.resharper.user
 tags
 *.nupkg
+TestResult.xml
