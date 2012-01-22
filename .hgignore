@@ -14,3 +14,4 @@ obj
 _ReSharper*
 *.resharper.user
 tags
+*.nupkg

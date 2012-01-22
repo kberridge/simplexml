@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>Kevin Berridge</authors>
+    <owners>Kevin Berridge</owners>
+    <projectUrl>http://bitbucket.org/kberridge/simplexml</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Simple dynamic xml parsing</description>
+    <releaseNotes>Initial release</releaseNotes>
+    <copyright>Copyright 2012</copyright>
+    <tags>xml dynamic</tags>
+  </metadata>
+</package>
