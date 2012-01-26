@@ -86,7 +86,10 @@ namespace SimpleXmlTests
     public void WithSiblingNodesWithSameNames()
     {
       dynamic x = "<root><node>test</node><node>test2</node></root>".AsSimpleXml();
-      Assert.AreEqual("test", x.root.node);
+      var values = x.root.node;
+      Assert.IsInstanceOfType(typeof(IList<string>), values);
+      IList<string> list = (IList<string>)values;
+      Assert.AreEqual(2, list.Count);
     }
 
     [Test]

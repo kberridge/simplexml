@@ -10,35 +10,40 @@ namespace SimpleXmlNs
 {
   public class SimpleXml : DynamicObject
   {
-    XElement element;
+    List<XElement> elements;
 
     public SimpleXml(Stream stream)
     {
-      element = XElement.Load(stream);
+      elements = new List<XElement> { XElement.Load(stream) };
     }
 
     public SimpleXml(TextReader reader)
     {
-      element = XElement.Load(reader);
+      elements = new List<XElement> { XElement.Load(reader) };
     }
 
     public SimpleXml(XElement element)
     {
-      this.element = element;
+      this.elements = new List<XElement> { element };
+    }
+
+    private SimpleXml(IEnumerable<XElement> elements)
+    {
+      this.elements = elements.ToList();
     }
 
     public override bool TryGetMember(GetMemberBinder binder, out object result)
     {
-      result = FindFirstPropertyAccess(element, binder.Name);
+      result = FindFirstPropertyAccess(binder.Name);
       if (result != null) return true;
 
-      result = FindSpecialInnerValuePropertyAccess(element, binder.Name);
+      result = FindSpecialInnerValuePropertyAccess(binder.Name);
       if (result != null) return true;
 
-      result = FindChildNode(element, binder.Name);
+      result = FindChildNode(binder.Name);
       if (result != null) return true;
 
-      result = FindAttribute(element, binder.Name);
+      result = FindAttribute(binder.Name);
       if (result != null) return true;
 
       throw new InvalidOperationException("No node or attribute found: " + binder.Name);
@@ -46,6 +51,7 @@ namespace SimpleXmlNs
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
     {
+      var element = elements[0];
       bool wasSet = SetFirstProperty(element, binder.Name, value);
       if (wasSet) return true;
 
@@ -64,22 +70,24 @@ namespace SimpleXmlNs
     public string GetXml()
     {
       var sw = new StringWriter();
-      element.Save(sw);
+      elements[0].Save(sw);
       return sw.ToString();
     }
 
     public void Save(Stream stream, SaveOptions options=SaveOptions.None)
     {
-      element.Save(stream, options);
+      elements[0].Save(stream, options);
     }
 
     public void Save(TextWriter writer, SaveOptions options=SaveOptions.None)
     {
-      element.Save(writer, options);
+      elements[0].Save(writer, options);
     }
 
-    object FindFirstPropertyAccess(XElement element, string propertyName)
+    object FindFirstPropertyAccess(string propertyName)
     {
+      if (elements.Count != 1) return null;
+      var element = elements[0];
       if (!IsFirstPropertyAccess(element, propertyName)) return null;
 
       if (HasChildValues(element))
@@ -88,31 +96,33 @@ namespace SimpleXmlNs
        return element.Value;
     }
 
-    object FindSpecialInnerValuePropertyAccess(XElement element, string propertyName)
+    object FindSpecialInnerValuePropertyAccess(string propertyName)
     {
-      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(propertyName))
-        return element.Value;
+      if (!IsSpecialInnerValueProperty(propertyName)) return null;
 
-      return null;
+      var l = elements.Where(e => IsLeafWithAttributes(e)).Select(e => e.Value).ToList();
+      return l.Count == 0 ? null : l.ScalarIfSingle();
     }
 
-    object FindChildNode(XElement element, string propertyName)
+    object FindChildNode(string propertyName)
     {
-      var sub = element.Elements().FirstOrDefault(e => e.Name.LocalName == propertyName);
-      if (sub == null) return null;
+      var nodes = new List<XElement>();
+      foreach (var e in elements)
+        nodes.AddRange(e.Elements().Where(n => n.Name.LocalName == propertyName));
 
-      if (HasChildValues(sub))
-        return new SimpleXml(sub);
+      if (nodes.Count == 0)
+        return null;
+      else if (nodes.All(n => HasChildValues(n)))
+        return new SimpleXml(nodes.ToList());
+      else if (nodes.All(n => !HasChildValues(n)))
+        return nodes.Select(n => n.Value).ToList().ScalarIfSingle();
       else
-        return sub.Value;
+        throw new InvalidOperationException("The structure of your xml was inconsistent, some matching nodes had child values but others did not");
     }
 
-    object FindAttribute(XElement element, string propertyName)
+    object FindAttribute(string propertyName)
     {
-      var attr = element.Attribute(propertyName);
-      if (attr == null) return null;
-
-      return attr.Value;
+      return elements.Select(e => e.Attribute(propertyName)).Where(a => a != null).Select(a => a.Value).ToList().ScalarIfSingle();
     }
 
     bool SetFirstProperty(XElement element, string propertyName, object value)
@@ -174,6 +184,20 @@ namespace SimpleXmlNs
     bool IsFirstPropertyAccess(XElement element, string propertyName)
     {
       return element.Name.LocalName == propertyName;
+    }
+  }
+
+  public static class EnumerableExtensions
+  {
+    public static object ScalarIfSingle<T>(this IEnumerable<T> list)
+    {
+      int count = list.Count();
+      if (count == 0)
+        return null;
+      else if (count == 1)
+        return list.ElementAt(0);
+      else
+        return list;
     }
   }
 }
