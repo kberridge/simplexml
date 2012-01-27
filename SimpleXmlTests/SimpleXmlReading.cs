@@ -87,9 +87,57 @@ namespace SimpleXmlTests
     {
       dynamic x = "<root><node>test</node><node>test2</node></root>".AsSimpleXml();
       var values = x.root.node;
-      Assert.IsInstanceOfType(typeof(IList<string>), values);
+      Assert.IsInstanceOf<IList<string>>(values);
       IList<string> list = (IList<string>)values;
       Assert.AreEqual(2, list.Count);
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNameAndChildNodes()
+    {
+      dynamic x = 
+        @"<root>
+            <node>
+              <node2>
+                <node3>value1</node3>
+              </node2>
+            </node>
+            <node>
+              <node2>
+                <node3>value2</node3>
+              </node2>
+            </node>
+          </root>".AsSimpleXml();
+      var values = x.root.node.node2.node3;
+      Assert.IsInstanceOf<IList<string>>(values);
+      IList<string> list = (IList<string>)values;
+      Assert.AreEqual(2, list.Count);
+      Assert.AreEqual("value1", list[0]);
+      Assert.AreEqual("value2", list[1]);
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNameAndChildNodesAndAttributes()
+    {
+      dynamic x = 
+        @"<root>
+            <node>
+              <node2>
+                <node3 attr='attr1'>value1</node3>
+              </node2>
+            </node>
+            <node>
+              <node2>
+                <node3 attr='attr2'>value2</node3>
+              </node2>
+            </node>
+          </root>".AsSimpleXml();
+      var values = x.root.node.node2.node3.attr;
+      Assert.IsInstanceOf<IList<string>>(values);
+      IList<string> list = (IList<string>)values;
+      Assert.AreEqual(2, list.Count);
+      Assert.AreEqual("attr1", list[0]);
+      Assert.AreEqual("attr2", list[1]);
     }
 
     [Test]
