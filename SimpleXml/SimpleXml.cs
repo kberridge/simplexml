@@ -51,17 +51,16 @@ namespace SimpleXmlNs
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
     {
-      var element = elements[0];
-      bool wasSet = SetFirstProperty(element, binder.Name, value);
+      bool wasSet = SetFirstProperty(binder.Name, value);
       if (wasSet) return true;
 
-      wasSet = SetBySpecialInnerValueProperty(element, binder.Name, value);
+      wasSet = SetBySpecialInnerValueProperty(binder.Name, value);
       if (wasSet) return true;
 
-      wasSet = SetElementValue(element, binder.Name, value);
+      wasSet = SetElementValue(binder.Name, value);
       if (wasSet) return true;
 
-      wasSet = SetAttributeValue(element, binder.Name, value);
+      wasSet = SetAttributeValue(binder.Name, value);
       if (wasSet) return true;
 
       throw new InvalidOperationException("No node or attribute found: " + binder.Name);
@@ -125,8 +124,10 @@ namespace SimpleXmlNs
       return elements.Select(e => e.Attribute(propertyName)).Where(a => a != null).Select(a => a.Value).ToList().ScalarIfSingle();
     }
 
-    bool SetFirstProperty(XElement element, string propertyName, object value)
+    bool SetFirstProperty(string propertyName, object value)
     {
+      if (elements.Count != 1) return false;
+      var element = elements[0];
       if (!IsFirstPropertyAccess(element, propertyName)) return false;
 
       if (element.HasElements)
@@ -136,33 +137,29 @@ namespace SimpleXmlNs
       return true;
     }
 
-    bool SetBySpecialInnerValueProperty(XElement element, string propertyName, object value)
-
+    bool SetBySpecialInnerValueProperty(string propertyName, object value)
     {
-      if (IsLeafWithAttributes(element) && IsSpecialInnerValueProperty(propertyName))
-      {
-        element.Value = value as string;
-        return true;
-      }
+      if (!IsSpecialInnerValueProperty(propertyName)) return false;
 
-      return false;
-    }
-
-    bool SetElementValue(XElement element, string propertyName, object value)
-    {
-      var sub = element.Elements().FirstOrDefault(e => e.Name.LocalName == propertyName);
-      if (sub == null) return false;
-
-      sub.Value = value as string;
+      var l = elements.Where(e => IsLeafWithAttributes(e)).ToList();
+      if (l.Count == 0) return false;
+      l.ForEach(e => e.Value = value as string);
       return true;
     }
 
-    bool SetAttributeValue(XElement element, string propertyName, object value)
+    bool SetElementValue(string propertyName, object value)
     {
-      var attr = element.Attribute(propertyName);
-      if (attr == null) return false;
+      var l = elements.SelectMany(e => e.Elements().Where(sub => sub.Name.LocalName == propertyName)).ToList();
+      if (l.Count == 0) return false;
+      l.ForEach(e => e.Value = value as string);
+      return true;
+    }
 
-      attr.Value = value as string;
+    bool SetAttributeValue(string propertyName, object value)
+    {
+      var l = elements.Select(e => e.Attribute(propertyName)).Where(e => e != null).ToList();
+      if (l.Count == 0) return false;
+      l.ForEach(a => a.Value = value as string);
       return true;
     }
 

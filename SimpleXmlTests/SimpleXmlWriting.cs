@@ -6,6 +6,7 @@ using NUnit.Framework;
 using System.IO;
 using SimpleXmlNs;
 using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace SimpleXmlTests
 {
@@ -110,8 +111,53 @@ namespace SimpleXmlTests
       x.root.node = "test3";
 
       var xmlString = x.GetXml();
-      Assert.IsTrue(xmlString.Contains("<node>test3</node>"));
-      Assert.IsTrue(xmlString.Contains("<node>test2</node>"));
+      Assert.IsTrue(Regex.IsMatch(xmlString, @"<node>test3</node>\s*<node>test3</node>"));
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNameAndChildNodes()
+    {
+      dynamic x =
+        @"<root>
+            <node>
+              <node2>
+                <node3>value1</node3>
+              </node2>
+            </node>
+            <node>
+              <node2>
+                <node3>value2</node3>
+              </node2>
+            </node>
+          </root>".AsSimpleXml();
+
+      x.root.node.node2.node3 = "value3";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(Regex.IsMatch(xmlString, "<node3>value3</node3>.*<node3>value3</node3>", RegexOptions.Singleline));
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNameAndChildNodesAndAttributes()
+    {
+      dynamic x =
+        @"<root>
+            <node>
+              <node2>
+                <node3 attr='attr1'>value1</node3>
+              </node2>
+            </node>
+            <node>
+              <node2>
+                <node3 attr='attr2'>value2</node3>
+              </node2>
+            </node>
+          </root>".AsSimpleXml();
+
+      x.root.node.node2.node3.attr = "attr3";
+
+      var xmlString = x.GetXml();
+      Assert.IsTrue(Regex.IsMatch(xmlString, "<node3 attr=\"attr3\">value1</node3>.*<node3 attr=\"attr3\">value2</node3>", RegexOptions.Singleline));
     }
 
     [Test]
