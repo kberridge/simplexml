@@ -16,7 +16,7 @@ namespace SimpleXmlTests
     [Test]
     public void SimpleValue()
     {
-      dynamic x = "<root><child>value</child></root>".AsSimpleXml();
+      var x = XmlStrings.Simplest;
       x.root.child = "new value";
 
       var xmlString = x.GetXml();
@@ -26,7 +26,7 @@ namespace SimpleXmlTests
     [Test]
     public void AttributesOnRoot()
     {
-      dynamic x = "<root attr=\"test\"><child>value</child></root>".AsSimpleXml();
+      var x = XmlStrings.RootAttribute;
       x.root.attr = "new attr value";
 
       var xmlString = x.GetXml();
@@ -36,7 +36,7 @@ namespace SimpleXmlTests
     [Test]
     public void AttributesOnLeaf()
     {
-      dynamic x = "<root><child attr=\"test\">value</child></root>".AsSimpleXml();
+      var x = XmlStrings.LeafAttribute;
       x.root.child.attr = "new attr value";
 
       var xmlString = x.GetXml();
@@ -46,7 +46,7 @@ namespace SimpleXmlTests
     [Test]
     public void ValueOnLeafWithAttributes()
     {
-      dynamic x = "<root><child attr=\"test\">value</child></root>".AsSimpleXml();
+      var x = XmlStrings.LeafAttribute;
       x.root.child.text = "new value";
 
       var xmlString = x.GetXml();
@@ -63,7 +63,7 @@ namespace SimpleXmlTests
     [Test]
     public void SettingValueOfRoot()
     {
-      dynamic x = "<root></root>".AsSimpleXml();
+      var x = XmlStrings.EmptyRoot;
       x.root = "test";
 
       var xmlString = x.GetXml();
@@ -73,7 +73,7 @@ namespace SimpleXmlTests
     [Test]
     public void SettingValueOfRootOnlyAttribute()
     {
-      dynamic x = "<root attr=\"test\">value</root>".AsSimpleXml();
+      var x = XmlStrings.AttributeRootOnly;
       x.root.attr = "testvalue";
 
       var xmlString = x.GetXml();
@@ -83,21 +83,21 @@ namespace SimpleXmlTests
     [Test]
     public void MissingNode()
     {
-      dynamic x = "<root><child>value</child></root>".AsSimpleXml();
+      var x = XmlStrings.Simplest;
       Assert.Catch<InvalidOperationException>(() => x.root.dne = "missing");
     }
 
     [Test]
     public void MissingAttr()
     {
-      dynamic x = "<root><child attr=\"test\">value</child></root>".AsSimpleXml();
+      var x = XmlStrings.LeafAttribute;
       Assert.Catch<InvalidOperationException>(() => x.root.child.noattr = "missing");
     }
 
     [Test]
     public void WithSiblingNodesWithDiffNames()
     {
-      dynamic x = "<root><node1>test</node1><node2>test2</node2></root>".AsSimpleXml();
+      var x = XmlStrings.SiblingsWithDifferentNames;
       x.root.node2 = "test3";
 
       var xmlString = x.GetXml();
@@ -107,7 +107,7 @@ namespace SimpleXmlTests
     [Test]
     public void WithSiblingNodesWithSameNames()
     {
-      dynamic x = "<root><node>test</node><node>test2</node></root>".AsSimpleXml();
+      var x = XmlStrings.SiblingsWithSameNames;
       x.root.node = "test3";
 
       var xmlString = x.GetXml();
@@ -117,20 +117,7 @@ namespace SimpleXmlTests
     [Test]
     public void WithSiblingNodesWithSameNameAndChildNodes()
     {
-      dynamic x =
-        @"<root>
-            <node>
-              <node2>
-                <node3>value1</node3>
-              </node2>
-            </node>
-            <node>
-              <node2>
-                <node3>value2</node3>
-              </node2>
-            </node>
-          </root>".AsSimpleXml();
-
+      var x = XmlStrings.SiblingsWithSameNameChildNodes;
       x.root.node.node2.node3 = "value3";
 
       var xmlString = x.GetXml();
@@ -140,20 +127,7 @@ namespace SimpleXmlTests
     [Test]
     public void WithSiblingNodesWithSameNameAndChildNodesAndAttributes()
     {
-      dynamic x =
-        @"<root>
-            <node>
-              <node2>
-                <node3 attr='attr1'>value1</node3>
-              </node2>
-            </node>
-            <node>
-              <node2>
-                <node3 attr='attr2'>value2</node3>
-              </node2>
-            </node>
-          </root>".AsSimpleXml();
-
+      var x = XmlStrings.SiblingsWithSameNameChildNodesWithAttribute;
       x.root.node.node2.node3.attr = "attr3";
 
       var xmlString = x.GetXml();
@@ -163,14 +137,7 @@ namespace SimpleXmlTests
     [Test]
     public void WithXmlNs()
     {
-      dynamic x = @"<section xmlns='urn:com:blogs-r-us'>
-   <title>Blogs</title>
-   <signing>
-     <author title='Mr' name='Kevin Berridge' />
-     <blog title='kwblog' />
-   </signing>
-</section>".AsSimpleXml();
-
+      var x = XmlStrings.XmlNs;
       x.section.title = "Great Blogs";
 
       var xmlString = x.GetXml();
@@ -180,7 +147,7 @@ namespace SimpleXmlTests
     [Test]
     public void WithNamedXmlNs()
     {
-      dynamic x = "<h:section xmlns:h=\"http://www.w3.org/HTML/1998/html4\"><h:title>Blogs</h:title></h:section>".AsSimpleXml();
+      dynamic x = XmlStrings.NamedXmlNs;
       x.section.title = "Awesome Blogs";
 
       var xmlString = x.GetXml();

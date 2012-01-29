@@ -52,6 +52,7 @@
     <Compile Include="SimpleXmlReading.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SimpleXmlWriting.cs" />
+    <Compile Include="XmlStrings.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
