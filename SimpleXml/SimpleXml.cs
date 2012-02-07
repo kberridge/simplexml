@@ -34,36 +34,38 @@ namespace SimpleXmlNs
 
     public override bool TryGetMember(GetMemberBinder binder, out object result)
     {
-      result = FindFirstPropertyAccess(binder.Name);
+      var elementName = binder.Name;
+      result = FindFirstPropertyAccess(elementName);
       if (result != null) return true;
 
-      result = FindSpecialInnerValuePropertyAccess(binder.Name);
+      result = FindSpecialInnerValuePropertyAccess(elementName);
       if (result != null) return true;
 
-      result = FindChildNode(binder.Name);
+      result = FindChildNode(elementName);
       if (result != null) return true;
 
-      result = FindAttribute(binder.Name);
+      result = FindAttribute(elementName);
       if (result != null) return true;
 
-      throw new NodeOrAttributeNotFoundException(binder.Name);
+      throw new NodeOrAttributeNotFoundException(elementName);
     }
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
     {
-      bool wasSet = SetFirstProperty(binder.Name, value);
+      var elementName = binder.Name;
+      bool wasSet = SetFirstProperty(elementName, value);
       if (wasSet) return true;
 
-      wasSet = SetBySpecialInnerValueProperty(binder.Name, value);
+      wasSet = SetBySpecialInnerValueProperty(elementName, value);
       if (wasSet) return true;
 
-      wasSet = SetElementValue(binder.Name, value);
+      wasSet = SetChildNodeValue(elementName, value);
       if (wasSet) return true;
 
-      wasSet = SetAttributeValue(binder.Name, value);
+      wasSet = SetAttributeValue(elementName, value);
       if (wasSet) return true;
 
-      throw new NodeOrAttributeNotFoundException(binder.Name);
+      throw new NodeOrAttributeNotFoundException(elementName);
     }
 
     public string GetXml()
@@ -83,6 +85,10 @@ namespace SimpleXmlNs
       elements[0].Save(writer, options);
     }
 
+    /// <summary>
+    /// The first property access is a special case because the XElement is already at the root level, 
+    /// but SimpleXml requires you to explicitly dot into the root.
+    /// </summary>
     object FindFirstPropertyAccess(string propertyName)
     {
       if (elements.Count != 1) return null;
@@ -105,23 +111,23 @@ namespace SimpleXmlNs
 
     object FindChildNode(string propertyName)
     {
-      var nodes = new List<XElement>();
-      foreach (var e in elements)
-        nodes.AddRange(e.Elements().Where(n => n.Name.LocalName == propertyName));
+      var nodes = elements.SelectMany(e => e.Elements().Where(n => n.Name.LocalName == propertyName)).ToList();
 
       if (nodes.Count == 0)
         return null;
-      else if (nodes.All(n => HasChildValues(n)))
-        return new SimpleXml(nodes.ToList());
-      else if (nodes.All(n => !HasChildValues(n)))
-        return nodes.Select(n => n.Value).ToList().ScalarIfSingle();
-      else
+      if (nodes.Any(n => HasChildValues(n)) && nodes.Any(n => !HasChildValues(n)))
         throw new InconsistentXmlStructureException(InconsistentMessages.Nodes);
+
+      if (HasChildValues(nodes[0]))
+        return new SimpleXml(nodes);
+      else
+        return nodes.Select(n => n.Value).ToList().ScalarIfSingle();
     }
 
     object FindAttribute(string propertyName)
     {
       var attrs = elements.Select(e => e.Attribute(propertyName)).ToList();
+
       if (attrs.All(a => a == null))
         return null;
       if (attrs.Any(a => a == null))
@@ -130,6 +136,10 @@ namespace SimpleXmlNs
       return attrs.Select(a => a.Value).ToList().ScalarIfSingle();
     }
 
+    /// <summary>
+    /// The first property access is a special case because the XElement is already at the root level, 
+    /// but SimpleXml requires you to explicitly dot into the root.
+    /// </summary>
     bool SetFirstProperty(string propertyName, object value)
     {
       if (elements.Count != 1) return false;
@@ -153,32 +163,30 @@ namespace SimpleXmlNs
       return true;
     }
 
-    bool SetElementValue(string propertyName, object value)
+    bool SetChildNodeValue(string propertyName, object value)
     {
       var nodes = elements.SelectMany(e => e.Elements().Where(sub => sub.Name.LocalName == propertyName)).ToList();
+
       if (nodes.Count == 0)
         return false;
-      else if (nodes.All(n => HasChildValues(n)) || nodes.All(n => !HasChildValues(n)))
-      {
-        nodes.ForEach(e => e.Value = value as string);
-        return true;
-      }
-      else
+      if (nodes.Any(n => HasChildValues(n)) && nodes.Any(n => !HasChildValues(n)))
         throw new InconsistentXmlStructureException(InconsistentMessages.Nodes);
+
+      nodes.ForEach(e => e.Value = value as string);
+      return true;
     }
 
     bool SetAttributeValue(string propertyName, object value)
     {
       var attrs = elements.Select(e => e.Attribute(propertyName)).ToList();
+
       if (attrs.All(a => a == null))
         return false;
-      else if (attrs.Any(a => a == null))
+      if (attrs.Any(a => a == null))
         throw new InconsistentXmlStructureException(InconsistentMessages.Attributes);
-      else
-      {
-        attrs.ForEach(a => a.Value = value as string);
-        return true;
-      }
+
+      attrs.ForEach(a => a.Value = value as string);
+      return true;
     }
 
     bool HasChildValues(XElement e)
