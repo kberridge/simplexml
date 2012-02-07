@@ -46,7 +46,7 @@ namespace SimpleXmlNs
       result = FindAttribute(binder.Name);
       if (result != null) return true;
 
-      throw new InvalidOperationException("No node or attribute found: " + binder.Name);
+      throw new NodeOrAttributeNotFoundException(binder.Name);
     }
 
     public override bool TrySetMember(SetMemberBinder binder, object value)
@@ -63,7 +63,7 @@ namespace SimpleXmlNs
       wasSet = SetAttributeValue(binder.Name, value);
       if (wasSet) return true;
 
-      throw new InvalidOperationException("No node or attribute found: " + binder.Name);
+      throw new NodeOrAttributeNotFoundException(binder.Name);
     }
 
     public string GetXml()
@@ -116,12 +116,18 @@ namespace SimpleXmlNs
       else if (nodes.All(n => !HasChildValues(n)))
         return nodes.Select(n => n.Value).ToList().ScalarIfSingle();
       else
-        throw new InvalidOperationException("The structure of your xml was inconsistent, some matching nodes had child values but others did not");
+        throw new InconsistentXmlStructureException(InconsistentMessages.Nodes);
     }
 
     object FindAttribute(string propertyName)
     {
-      return elements.Select(e => e.Attribute(propertyName)).Where(a => a != null).Select(a => a.Value).ToList().ScalarIfSingle();
+      var attrs = elements.Select(e => e.Attribute(propertyName)).ToList();
+      if (attrs.All(a => a == null))
+        return null;
+      if (attrs.Any(a => a == null))
+        throw new InconsistentXmlStructureException(InconsistentMessages.Attributes);
+
+      return attrs.Select(a => a.Value).ToList().ScalarIfSingle();
     }
 
     bool SetFirstProperty(string propertyName, object value)
@@ -149,18 +155,30 @@ namespace SimpleXmlNs
 
     bool SetElementValue(string propertyName, object value)
     {
-      var l = elements.SelectMany(e => e.Elements().Where(sub => sub.Name.LocalName == propertyName)).ToList();
-      if (l.Count == 0) return false;
-      l.ForEach(e => e.Value = value as string);
-      return true;
+      var nodes = elements.SelectMany(e => e.Elements().Where(sub => sub.Name.LocalName == propertyName)).ToList();
+      if (nodes.Count == 0)
+        return false;
+      else if (nodes.All(n => HasChildValues(n)) || nodes.All(n => !HasChildValues(n)))
+      {
+        nodes.ForEach(e => e.Value = value as string);
+        return true;
+      }
+      else
+        throw new InconsistentXmlStructureException(InconsistentMessages.Nodes);
     }
 
     bool SetAttributeValue(string propertyName, object value)
     {
-      var l = elements.Select(e => e.Attribute(propertyName)).Where(e => e != null).ToList();
-      if (l.Count == 0) return false;
-      l.ForEach(a => a.Value = value as string);
-      return true;
+      var attrs = elements.Select(e => e.Attribute(propertyName)).ToList();
+      if (attrs.All(a => a == null))
+        return false;
+      else if (attrs.Any(a => a == null))
+        throw new InconsistentXmlStructureException(InconsistentMessages.Attributes);
+      else
+      {
+        attrs.ForEach(a => a.Value = value as string);
+        return true;
+      }
     }
 
     bool HasChildValues(XElement e)
@@ -184,7 +202,7 @@ namespace SimpleXmlNs
     }
   }
 
-  public static class EnumerableExtensions
+  static class EnumerableExtensions
   {
     public static object ScalarIfSingle<T>(this IEnumerable<T> list)
     {
@@ -196,5 +214,33 @@ namespace SimpleXmlNs
       else
         return list;
     }
+  }
+
+  static class InconsistentMessages
+  {
+    public static string Nodes 
+    { 
+      get 
+      { 
+        return "The structure of your xml was inconsistent, some matching nodes had child values but others did not"; 
+      } 
+    }
+    public static string Attributes 
+    { 
+      get 
+      { 
+        return "The structure of your xml was inconsistent, some nodes had matching attributes but others did not"; 
+      }
+    }
+  }
+
+  public class InconsistentXmlStructureException : Exception
+  {
+    public InconsistentXmlStructureException(string message) : base(message) { }
+  }
+
+  public class NodeOrAttributeNotFoundException : Exception
+  {
+    public NodeOrAttributeNotFoundException(string elementName) : base("No node or attribute found: " + elementName) { }
   }
 }

@@ -84,14 +84,14 @@ namespace SimpleXmlTests
     public void MissingNode()
     {
       var x = XmlStrings.Simplest;
-      Assert.Catch<InvalidOperationException>(() => x.root.dne = "missing");
+      Assert.Catch<NodeOrAttributeNotFoundException>(() => x.root.dne = "missing");
     }
 
     [Test]
     public void MissingAttr()
     {
       var x = XmlStrings.LeafAttribute;
-      Assert.Catch<InvalidOperationException>(() => x.root.child.noattr = "missing");
+      Assert.Catch<NodeOrAttributeNotFoundException>(() => x.root.child.noattr = "missing");
     }
 
     [Test]
@@ -132,6 +132,27 @@ namespace SimpleXmlTests
 
       var xmlString = x.GetXml();
       Assert.IsTrue(Regex.IsMatch(xmlString, "<node3 attr=\"attr3\">value1</node3>.*<node3 attr=\"attr3\">value2</node3>", RegexOptions.Singleline));
+    }
+
+    [Test]
+    public void WithSiblingNodesWithSameNameButOneMissingChildNode()
+    {
+      dynamic x = XmlStrings.SiblingsWithSameNameButOneWithoutChildNode;
+      Assert.Catch<InconsistentXmlStructureException>(() => { x.root.node.node1.node2 = "value"; });
+    }
+
+    [Test]
+    public void WithSiblingsWithSameNameButOneWithExtraNode()
+    {
+      dynamic x = XmlStrings.SiblingsWithSameNameButOneWithExtraNode;
+      Assert.Catch<InconsistentXmlStructureException>(() => { x.root.node.node1.node2 = "value"; });
+    }
+
+    [Test]
+    public void WithSiblingsWithSameNameButOneWithMissingAttribute()
+    {
+      dynamic x = XmlStrings.SiblingsWithSameNameButOneMissingAttributeOnChildNode;
+      Assert.Catch<InconsistentXmlStructureException>(() => { x.root.node.node1.node2.attr = "v-new"; });
     }
 
     [Test]

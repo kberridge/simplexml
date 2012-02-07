@@ -88,6 +88,84 @@ namespace SimpleXmlTests
       }
     }
 
+    public static dynamic SiblingsWithSameNameButOneWithoutChildNode
+    {
+      get
+      {
+        return 
+          @"<root>
+              <node>
+                <node1>
+                  <node2>a value</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  <node2>a value2</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  a different value
+                </node1>
+              </node>
+            </root>".AsSimpleXml();
+      }
+    }
+
+    public static dynamic SiblingsWithSameNameButOneWithExtraNode
+    {
+      get
+      {
+        return
+          @"<root>
+              <node>
+                <node1>
+                  <node2>a value</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  <node2>a value2</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  <node2>
+                    <node3>AWESOME</node3>
+                  </node2>
+                </node1>
+              </node>
+            </root>".AsSimpleXml();
+      }
+    }
+
+    public static dynamic SiblingsWithSameNameButOneMissingAttributeOnChildNode
+    {
+      get
+      {
+        return
+          @"<root>
+              <node>
+                <node1>
+                  <node2 attr='v1'>a value</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  <node2 attr='v2'>a value2</node2>
+                </node1>
+              </node>
+              <node>
+                <node1>
+                  <node2>
+                    <node3>AWESOME</node3>
+                  </node2>
+                </node1>
+              </node>
+            </root>".AsSimpleXml();
+      }
+    }
     public static dynamic XmlNs
     {
       get
