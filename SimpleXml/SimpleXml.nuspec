@@ -10,7 +10,7 @@
     <licenseUrl>https://bitbucket.org/kberridge/simplexml/raw/default/license.txt</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Simple dynamic xml parsing</description>
-    <releaseNotes>Initial release</releaseNotes>
+    <releaseNotes>Now with multiple matching node support</releaseNotes>
     <copyright>Copyright 2012</copyright>
     <tags>xml dynamic</tags>
   </metadata>
