@@ -3,20 +3,70 @@ SimpleXml is simple dynamic xml parsing.
 Install with NuGet: install-package SimpleXml.
 Or download dll from the Downloads tab.
 
-**Read Xml**::
+**Read and Write Xml**::
 
   var x = 
     @"<root attr="attrvalue">
-      <child>nodevalue</child>
-    </root>".AsSimpleXml();
+        <child>nodevalue</child>
+      </root>".AsSimpleXml();
 
   x.root.child == "nodevalue"
   x.root.attr == "attrvalue"
 
-**Write Xml**::
-
   x.root.child = "newnodevalue";
   x.root.attr = "newattrvalue";
+
+**Read and Write Multiple Nodes**::
+
+  var x =
+    @"<root>
+        <node>value1</node>
+        <node>value2</node>
+      </root>".AsSimpleXml();
+
+  x.root.node == IEnumerable containing "value1" and "value2"
+  x.root.node = "new value"
+
+**Read and Write Multiple Nodes With Child Nodes**::
+
+  var x =
+    @"<root>
+        <node>
+          <child>value1</child>
+        </node>
+        <node>
+          <child>value2</child>
+        </node>
+      </root>".AsSimpleXml();
+
+  x.root.node.child == IEnumerable containing "value1" and "value2"
+  x.root.node.child = "new value"
+
+**Selecting Nodes By Attribute Value**::
+
+  var x = 
+    @"<root>
+        <node name="a">value1</node>
+        <node name="b">value2</node>
+        <node name="c">value3</node>
+      </root>".AsSimpleXml();
+
+  x.root.node.First("name", "b") == "value2"
+  x.root.node.FirstOrDefault("name", "b") == "value2"
+  x.root.node.Where("name", "b") == IEnumerable containing "value2"
+
+**Selecting Nodes By Attribute Value With Child Nodes**::
+
+  var x = 
+    @"<root>
+        <node name="a"><child>value1</child></node>
+        <node name="b"><child>value2</child></node>
+        <node name="c"><child>value3</child></node>
+      </root>".AsSimpleXml();
+
+  x.root.node.First("name", "b").child == "value2"
+  x.root.node.FirstOrDefault("name", "b").child == "value2"
+  x.root.node.Where("name", "b").child == "value2"
 
 **Load From File**::
 
@@ -32,8 +82,8 @@ Or download dll from the Downloads tab.
 
   var x =
     @"<root xmlns="http://kevinberridge.com/namespacessuck" xmlns:t="http://kevinberridge.com/namespacesreallysuck">
-      <t:child>value</child>
-    </root>".AsSimpleXml();
+        <t:child>value</child>
+      </root>".AsSimpleXml();
 
   x.root.child == "value"
 
@@ -41,8 +91,12 @@ Or download dll from the Downloads tab.
 
   var x =
     @"<root>
-      <child attr="attrvalue">childvalue</child>
-    </root>".AsSimpleXml();
+        <child attr="attrvalue">childvalue</child>
+      </root>".AsSimpleXml();
 
   x.root.child.text == "childvalue"
   x.root.child.attr == "attrvalue"
+
+
+Written by `Kevin Berridge <http://www.kevinberridge.com>`_
+Licensed under the `MIT License <http://www.opensource.org/licenses/mit-license.php>`_

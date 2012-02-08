@@ -209,7 +209,7 @@ namespace SimpleXmlTests
     [Test]
     public void WhereWithValue()
     {
-      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='b'>value3></node></root>".AsSimpleXml();
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='b'>value3</node></root>".AsSimpleXml();
       var matches = x.root.node.Where("name", "b");
       Assert.Contains("value2", matches);
       Assert.Contains("value2", matches);
