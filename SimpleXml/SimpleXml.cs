@@ -84,6 +84,30 @@ namespace SimpleXmlNs
     {
       elements[0].Save(writer, options);
     }
+    
+    public dynamic First(string attributeName, string value)
+    {
+      var match = elements.First(e => e.Attributes().Where(a => a.Name.LocalName == attributeName && a.Value == value).Count() > 0);
+      if (match.HasElements) return new SimpleXml(match);
+      else return match.Value;
+    }
+
+    public dynamic FirstOrDefault(string attributeName, string value)
+    {
+      var match = elements.FirstOrDefault(e => e.Attributes().Where(a => a.Name.LocalName == attributeName && a.Value == value).Count() > 0);
+      if (match == null) return null;
+      if (match.HasElements) return new SimpleXml(match);
+      else return match.Value;
+    }
+
+    public dynamic Where(string attributeName, string value)
+    {
+      var matches = elements.Where(e => e.Attributes().Where(a => a.Name.LocalName == attributeName && a.Value == value).Count() > 0);
+      if (matches.All(n => n.HasElements))
+        return new SimpleXml(matches);
+      else
+        return matches.Select(n => n.Value).ToList();
+    }
 
     /// <summary>
     /// The first property access is a special case because the XElement is already at the root level, 

@@ -150,5 +150,78 @@ namespace SimpleXmlTests
       dynamic x = XmlStrings.NamedXmlNs;
       Assert.AreEqual("Blogs", x.section.title);
     }
+
+    [Test]
+    public void FirstWithValue()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.AreEqual("value2", x.root.node.First("name", "b"));
+    }
+
+    [Test]
+    public void FirstWithChildElements()
+    {
+      dynamic x = "<root><node name='a'><child>value</child></node><node name='b'><child>value2</child></node><node name='c'><child>value3</child></node></root>".AsSimpleXml();
+      Assert.AreEqual("value2", x.root.node.First("name", "b").child);
+    }
+
+    [Test]
+    public void FirstWithNoMatchingValue()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.Catch<InvalidOperationException>(() => { x.root.node.First("name", "d"); });
+    }
+
+    [Test]
+    public void FirstWithNoMatchingAttribute()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.Catch<InvalidOperationException>(() => { x.root.node.First("missing", "d"); });
+    }
+
+    [Test]
+    public void FirstOrDefaultWithValue()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.AreEqual("value2", x.root.node.FirstOrDefault("name", "b"));
+    }
+
+    [Test]
+    public void FirstOrDefaultWithChildElements()
+    {
+      dynamic x = "<root><node name='a'><child>value</child></node><node name='b'><child>value2</child></node><node name='c'><child>value3</child></node></root>".AsSimpleXml();
+      Assert.AreEqual("value2", x.root.node.FirstOrDefault("name", "b").child);
+    }
+
+    [Test]
+    public void FirstOrDefaultWithNoMatchingValue()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.IsNull(x.root.node.FirstOrDefault("name", "d"));
+    }
+
+    [Test]
+    public void FirstOrDefaultWithNoMatchingAttribute()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='c'>value3></node></root>".AsSimpleXml();
+      Assert.IsNull(x.root.node.FirstOrDefault("missing", "d"));
+    }
+    [Test]
+    public void WhereWithValue()
+    {
+      dynamic x = "<root><node name='a'>value</node><node name='b'>value2</node><node name='b'>value3></node></root>".AsSimpleXml();
+      var matches = x.root.node.Where("name", "b");
+      Assert.Contains("value2", matches);
+      Assert.Contains("value2", matches);
+    }
+
+    [Test]
+    public void WhereWithChildElements()
+    {
+      dynamic x = "<root><node name='a'><child>value</child></node><node name='b'><child>value2</child></node><node name='b'><child>value3</child></node></root>".AsSimpleXml();
+      var matches = x.root.node.Where("name", "b").child;
+      Assert.Contains("value2", matches);
+      Assert.Contains("value2", matches);
+    }
   }
 }
