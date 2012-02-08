@@ -99,4 +99,5 @@ Or download dll from the Downloads tab.
 
 
 Written by `Kevin Berridge <http://www.kevinberridge.com>`_
+
 Licensed under the `MIT License <http://www.opensource.org/licenses/mit-license.php>`_
