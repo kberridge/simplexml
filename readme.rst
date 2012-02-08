@@ -1,6 +1,7 @@
 SimpleXml is simple dynamic xml parsing.
 
-Install with NuGet: install-package SimpleXml.
+`Install with NuGet <https://nuget.org/packages/SimpleXml>`_: install-package SimpleXml
+
 Or download dll from the Downloads tab.
 
 **Read and Write Xml**::
