@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using System.IO;
 using SimpleXmlNs;
+using System.Xml;
 
 namespace SimpleXmlTests
 {
@@ -222,6 +223,20 @@ namespace SimpleXmlTests
       var matches = x.root.node.Where("name", "b").child;
       Assert.Contains("value2", matches);
       Assert.Contains("value2", matches);
+    }
+
+    [Test]
+    public void WithPrefixesWithNoXmlns()
+    {
+      var nameTable = new NameTable();
+      var nameSpaceManager = new XmlNamespaceManager(nameTable);
+      nameSpaceManager.AddNamespace("log4j", "urn:ignore");
+      var parserContext = new XmlParserContext(null, nameSpaceManager, null, XmlSpace.None);
+      var txtReader = new XmlTextReader(XmlStrings.PrefixesWithNoXmlns, XmlNodeType.Element, parserContext);
+
+      dynamic x = new SimpleXml(txtReader);
+
+      Assert.AreEqual("myMachine", x.@event.properties.data.value[0]);
     }
   }
 }

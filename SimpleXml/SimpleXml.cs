@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.IO;
 using System.Dynamic;
+using System.Xml;
 
 namespace SimpleXmlNs
 {
@@ -20,6 +21,11 @@ namespace SimpleXmlNs
     public SimpleXml(TextReader reader)
     {
       elements = new List<XElement> { XElement.Load(reader) };
+    }
+
+    public SimpleXml(XmlTextReader xmlReader)
+    {
+      elements = new List<XElement> { XElement.Load(xmlReader) };
     }
 
     public SimpleXml(XElement element)

@@ -187,5 +187,23 @@ namespace SimpleXmlTests
         return "<h:section xmlns:h=\"http://www.w3.org/HTML/1998/html4\"><h:title>Blogs</h:title></h:section>".AsSimpleXml();
       }
     }
+
+    public static string PrefixesWithNoXmlns
+    {
+      get
+      {
+        return
+@"<log4j:event logger=""MyApp"" timestamp=""1219434607289"" level=""INFO"" thread=""4656"">
+    <log4j:message>my message</log4j:message>
+    <log4j:properties>
+        <log4j:data name=""log4jmachinename"" value=""myMachine""/>
+        <log4j:data name=""log4net:HostName"" value=""myHost""/>
+        <log4j:data name=""log4net:UserName"" value=""myUser""/>
+        <log4j:data name=""log4japp"" value=""myAppexe""/>
+    </log4j:properties>
+    <log4j:locationInfo class=""myClass"" method=""myMethod"" file=""C:\myApp\myFile.cs"" line=""266""/>
+</log4j:event>";
+      }
+    }
   }
 }
