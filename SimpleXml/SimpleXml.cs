@@ -6,10 +6,11 @@ using System.Xml.Linq;
 using System.IO;
 using System.Dynamic;
 using System.Xml;
+using System.Collections;
 
 namespace SimpleXmlNs
 {
-  public class SimpleXml : DynamicObject
+  public class SimpleXml : DynamicObject, IEnumerable
   {
     List<XElement> elements;
 
@@ -237,6 +238,11 @@ namespace SimpleXmlNs
     bool IsFirstPropertyAccess(XElement element, string propertyName)
     {
       return element.Name.LocalName == propertyName;
+    }
+
+    public IEnumerator GetEnumerator()
+    {
+      return elements.Select(e => new SimpleXml(e)).GetEnumerator();
     }
   }
 

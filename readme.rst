@@ -41,6 +41,24 @@ SimpleXml is simple dynamic xml parsing.
   x.root.node.child == IEnumerable containing "value1" and "value2"
   x.root.node.child = "new value"
 
+**Loop Over Child Nodes**::
+
+  var x = 
+    @"<root>
+        <node>
+          <child>value1</child>
+        </node>
+        <node>
+          <child>value2</child>
+        </node>
+      </root>".AsSimpleXml();
+
+  var nodes = x.root.node;
+  foreach(var node in nodes)
+  {
+    node.child == "value1" on first loop and "value2" on second loop
+  }   
+
 **Selecting Nodes By Attribute Value**::
 
   var x = 

@@ -106,6 +106,20 @@ namespace SimpleXmlTests
     }
 
     [Test]
+    public void WithSiblingNodesWithSameNameAndChildNodes_Each()
+    {
+      dynamic x = XmlStrings.SiblingsWithSameNameChildNodes;
+      var nodes = x.root.node;
+      Assert.IsInstanceOf<SimpleXml>(nodes);
+      int i = 1;
+      foreach (var n in nodes)
+      {
+        Assert.AreEqual("value" + i, n.node2.node3);
+        i++;
+      }
+    }
+
+    [Test]
     public void WithSiblingNodesWithSameNameAndChildNodesAndAttributes()
     {
       dynamic x = XmlStrings.SiblingsWithSameNameChildNodesWithAttribute;
